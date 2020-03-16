@@ -1,4 +1,4 @@
-package com.engineml.cli
+package io.tednology.cli
 
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.kittinunf.fuel.Fuel
@@ -14,7 +14,7 @@ class App {
 
 class Hello : CliktCommand() {
     override fun run() {
-        echo("Hello from Engine Native \uD83D\uDE43")
+        echo("Hello from Native CLI \uD83D\uDE43")
 
         val (_, response, result) = Fuel.get("https://httpbin.org/get").responseString()
         when (result) {

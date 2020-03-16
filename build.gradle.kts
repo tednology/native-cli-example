@@ -48,5 +48,5 @@ tasks {
 }
 
 application {
-    mainClassName = "com.engineml.cli.AppKt"
+    mainClassName = "io.tednology.cli.AppKt"
 }

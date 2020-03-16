@@ -1,4 +1,4 @@
-package com.engineml.cli
+package io.tednology.cli
 
 import kotlin.test.Test
 import kotlin.test.assertNotNull

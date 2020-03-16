@@ -1,7 +1,7 @@
 FROM oracle/graalvm-ce:20.0.0-java11 as compiler
 
-ARG JAR_NAME=engine-native-all.jar
-ARG BIN_NAME=engine-native
+ARG JAR_NAME=native-cli-all.jar
+ARG BIN_NAME=native-cli
 
 RUN mkdir -p /graal/src
 RUN gu install native-image
@@ -24,5 +24,5 @@ RUN ls /graal/src/
 RUN ls /graal/bin/
 
 FROM debian:stable-slim
-COPY --from=compiler /graal/bin/engine-native /
-CMD ["/engine-native"]
+COPY --from=compiler /graal/bin/native-cli /
+CMD ["/native-cli"]
