@@ -15,7 +15,9 @@ Install GraalVM 20.0.0+ for your platform: https://github.com/graalvm/graalvm-ce
     }
 ```
 
-Now you can build an executable native binary with `gradle nativeCompile`. It outputs the binary into the `build/bin` directory.
+Now you can build an executable native binary with `gradle nativeCompile`. It outputs the binary into the `build/bin` directory. Run it like any other platform binary, ex. `./build/bin/native-cli`:
+
+[![asciicast](https://asciinema.org/a/310865.svg)](https://asciinema.org/a/310865?speed=3&loop=1)
 
 ### Docker Images
 
