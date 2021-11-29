@@ -1,24 +1,22 @@
-package io.tednology.cli
+package io.tednology
 
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.kittinunf.fuel.Fuel
-import com.github.kittinunf.result.Result.Failure
-import com.github.kittinunf.result.Result.Success
-
-class App {
-    val greeting: String
-        get() {
-            return "Hello world."
-        }
-}
+import com.github.kittinunf.fuel.core.FuelError
+import com.github.kittinunf.fuel.core.Request
+import com.github.kittinunf.fuel.core.Response
+import com.github.kittinunf.result.Result
 
 class Hello : CliktCommand() {
     override fun run() {
         echo("Hello from Native CLI \uD83D\uDE43")
 
-        val (_, response, result) = Fuel.get("https://httpbin.org/get").responseString()
+        val (_: Request, response: Response, result: Result<String, FuelError>) =
+            Fuel
+                .get("https://httpbin.org/get")
+                .responseString()
         when (result) {
-            is Success -> {
+            is Result.Success -> {
                 echo("Status: ${response.statusCode}")
                 echo("Headers: ")
                 response.headers.entries.forEach { (key, values) ->
@@ -26,12 +24,12 @@ class Hello : CliktCommand() {
                 }
                 echo(result.value)
             }
-            is Failure -> result.error.printStackTrace()
+            is Result.Failure -> result.error.printStackTrace()
         }
     }
 }
 
 fun main(args: Array<String>) {
     Hello().main(args)
-    Thread.sleep(5000L)
+    Thread.sleep(1000L)
 }

@@ -1,4 +1,4 @@
-FROM oracle/graalvm-ce:20.0.0-java11 as compiler
+FROM ghcr.io/graalvm/graalvm-ce:java17-21.3.0 as compiler
 
 ARG JAR_NAME=native-cli-all.jar
 ARG BIN_NAME=native-cli
@@ -10,8 +10,8 @@ WORKDIR /graal/src
 
 COPY build/libs/$JAR_NAME /graal/src
 
+# Static is linux only
 RUN native-image \
-    --no-server \
     --report-unsupported-elements-at-runtime \
     --enable-http \
     --enable-https \

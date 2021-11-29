@@ -1,1 +1,3 @@
-rootProject.name = "native-cli"
+
+rootProject.name = "latest-kotlin-test"
+

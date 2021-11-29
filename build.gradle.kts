@@ -1,52 +1,93 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import java.io.ByteArrayOutputStream
+import java.nio.file.Paths
 
 plugins {
-    id("org.jetbrains.kotlin.jvm") version "1.3.70"
-
-    // Apply the application plugin to add support for building a CLI application.
+    kotlin("jvm") version "1.6.0"
     application
-    id("com.github.johnrengelman.shadow") version "5.1.0"
+    id("com.github.johnrengelman.shadow") version "7.1.0"
 }
 
+group = "io.tednology"
+version = "1.0-SNAPSHOT"
+
 repositories {
-    jcenter()
     mavenCentral()
 }
 
 dependencies {
-    implementation(platform("org.jetbrains.kotlin:kotlin-bom"))
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+    implementation("com.github.ajalt:clikt:2.8.0")
+    implementation("com.github.kittinunf.fuel:fuel:2.3.1")
 
-    implementation("com.github.ajalt:clikt:1.7.0")
-    implementation("com.github.kittinunf.fuel:fuel:2.2.1")
-
-    testImplementation("org.jetbrains.kotlin:kotlin-test")
-    testImplementation("org.jetbrains.kotlin:kotlin-test-junit")
+    testImplementation(kotlin("test"))
 }
 
-tasks {
-    withType<KotlinCompile> {
-        kotlinOptions.jvmTarget = "1.8"
-        kotlinOptions.freeCompilerArgs = listOf("-Xjsr305=strict")
+tasks.apply {
+    test {
+        useJUnitPlatform()
     }
-    register<Exec>("nativeCompile") {
-        dependsOn("shadowJar")
-        environment("JAVA_HOME", "/Library/Java/JavaVirtualMachines/graalvm-ce-java11-20.0.0/Contents/Home/bin/")
+    withType<KotlinCompile> {
+        kotlinOptions.jvmTarget = "17"
+    }
 
-        val cmdLineTokens = listOf(
+    register<Exec>("toolCheck") {
+        doFirst {
+            val javaHome = Paths.get(System.getenv("JAVA_HOME"))
+            val jvmReleaseData = javaHome.resolve("release").toFile().readLines(Charsets.UTF_8).associate { line ->
+                val (key, value) = line.split("=", limit = 2).map { it.trim('"') }
+                Pair(key, value)
+            }
+            val jvmVersion = JavaVersion.toVersion(
+                jvmReleaseData.getOrElse("JAVA_VERSION") {
+                    throw RuntimeException("Require GraalVM JDK. Check JAVA_HOME.")
+                }
+            )
+            if (!jvmVersion.isCompatibleWith(JavaVersion.VERSION_17)) {
+                throw RuntimeException("Requires Java 17 or higher.")
+            }
+            val isGraalVm = jvmReleaseData["GRAALVM_VERSION"]
+            if (isGraalVm.isNullOrBlank()) {
+                throw RuntimeException("Require GraalVM JDK. Check JAVA_HOME.")
+            }
+            val nativeImageInstalled = javaHome.resolve("bin").resolve("native-image").toFile().exists()
+            if (!nativeImageInstalled) {
+                throw RuntimeException("Requires `native-image` installed. Run `gu install native-image`.")
+            }
+        }
+
+        commandLine = listOf("native-image", "--version")
+        standardOutput = ByteArrayOutputStream()
+        doLast {
+            val output = standardOutput.toString().trim()
+            if (!output.contains("Java 17") && !output.contains("GraalVM")) {
+                throw RuntimeException("""
+                    Requires a Java 17 compatible GraalVM installation with 
+                    `native-image`; check JAVA_HOME environment variable.
+                    """.trimIndent())
+            }
+            logger.quiet(output)
+        }
+    }
+
+    register<Exec>("nativeBuild") {
+        dependsOn("toolCheck")
+
+        val jarPath = project.buildDir.resolve("libs").resolve("${project.name}-$version-all.jar").toString()
+        val binaryPath = project.buildDir.resolve("bin").resolve(project.name).toString()
+
+        commandLine = listOf(
             "native-image",
-            "--no-server",
+            "-H:+ReportExceptionStackTraces",
             "--report-unsupported-elements-at-runtime",
             "--enable-http",
             "--enable-https",
             "-jar",
-            project.buildDir.resolve("libs").resolve("${project.name}-all.jar").toString(),
-            project.buildDir.resolve("bin").resolve(project.name).toString()
+            jarPath,
+            binaryPath,
         )
-        commandLine = cmdLineTokens
     }
 }
 
 application {
-    mainClassName = "io.tednology.cli.AppKt"
+    mainClass.set("io.tednology.MainKt")
 }
