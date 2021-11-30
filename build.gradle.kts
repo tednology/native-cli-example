@@ -39,7 +39,7 @@ tasks.apply {
             }
             val jvmVersion = JavaVersion.toVersion(
                 jvmReleaseData.getOrElse("JAVA_VERSION") {
-                    throw RuntimeException("Require GraalVM JDK. Check JAVA_HOME.")
+                    throw RuntimeException("Requires Java JDK. Check JAVA_HOME.")
                 }
             )
             if (!jvmVersion.isCompatibleWith(JavaVersion.VERSION_17)) {
@@ -70,7 +70,7 @@ tasks.apply {
     }
 
     register<Exec>("buildNative") {
-        dependsOn("toolCheck")
+        dependsOn("toolCheck", "build")
 
         val jarPath = project.buildDir.resolve("libs").resolve("${project.name}-$version-all.jar").toString()
         val binaryPath = project.buildDir.resolve("bin").resolve(project.name).toString()
