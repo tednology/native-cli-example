@@ -1,6 +1,6 @@
 FROM ghcr.io/graalvm/graalvm-ce:java17-21.3.0 as compiler
 
-ARG JAR_NAME=native-cli-all.jar
+ARG JAR_NAME=latest-kotlin-test-1.0-SNAPSHOT-all.jar
 ARG BIN_NAME=native-cli
 
 RUN mkdir -p /graal/src

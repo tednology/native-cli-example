@@ -26,6 +26,7 @@ tasks.apply {
     test {
         useJUnitPlatform()
     }
+
     withType<KotlinCompile> {
         kotlinOptions.jvmTarget = "17"
     }
@@ -57,6 +58,7 @@ tasks.apply {
 
         commandLine = listOf("native-image", "--version")
         standardOutput = ByteArrayOutputStream()
+
         doLast {
             val output = standardOutput.toString().trim()
             if (!output.contains("Java 17") && !output.contains("GraalVM")) {
