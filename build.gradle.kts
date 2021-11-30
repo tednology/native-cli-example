@@ -69,7 +69,7 @@ tasks.apply {
         }
     }
 
-    register<Exec>("nativeBuild") {
+    register<Exec>("buildNative") {
         dependsOn("toolCheck")
 
         val jarPath = project.buildDir.resolve("libs").resolve("${project.name}-$version-all.jar").toString()
@@ -89,5 +89,5 @@ tasks.apply {
 }
 
 application {
-    mainClass.set("io.tednology.MainKt")
+    mainClass.set("io.tednology.GreeterKt")
 }
